@@ -47,10 +47,34 @@ void FormatChanger::openFile()
 
 void FormatChanger::changeFormat()
 {
+    QFile file(filePath);
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        filePathLabel->setText("Can not open file");
+        changeFormatButton->setEnabled(false);
+        return;
+    }
+    int fileSize = file.size()-2;
+    int times = file.size()/405;
+    filePathLabel->setText(QString::number(fileSize));
+    QTextStream in(&file);
+    QString line = in.read(405);
 
-}
-
-void FormatChanger::txtToXml()
-{
-
+    QStringList list = filePath.split(".");
+    QString newFilePath = list[0] + ".xml";
+    QFile newFile(newFilePath);
+    if(!newFile.open(QFile::WriteOnly | QFile::Text))
+    {
+        filePathLabel->setText("Can not write file");
+        changeFormatButton->setEnabled(false);
+        return;
+    }
+    QXmlStreamWriter xmlWriter(&newFile);
+    xmlWriter.setAutoFormatting(true);
+    xmlWriter.writeStartDocument();
+    xmlWriter.writeStartElement("GridEyeData");
+    for(int i=0;i<times;i++)
+    {
+        xmlWriter.writeStartElement("DataFrame"+QString::number(i+1));
+    }
 }
