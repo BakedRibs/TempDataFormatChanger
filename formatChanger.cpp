@@ -85,25 +85,74 @@ void FormatChanger::changeFormat()
         xmlWriter.writeTextElement("RC","8*8");
         for(int j=0;j<8;j++)
         {
+            QString TempRow;
             for(int k=0;k<8;k++)
             {
-                QByteArray temp;
                 char c1 = temperature.at((j*8+k)*2+1).toInt(&ok,16)&0xFF;
                 char c2 = temperature.at((j*8+k)*2).toInt(&ok,16)&0xFF;
-                temp.append(c1);
-                temp.append(c2);
-                bool bool_arr[16];
-                bool twoSComplement[12];
-                for(int m=0;m<8;m++)
+                TempRow += hexToTemp(c1,c2);
+                if(k != 7)
                 {
-                    bool_arr[7-m] = ((c1 & 1<<m) != 0);
-                    bool_arr[7-m+8] = ((c2 & 1<<m) != 0);
+                    TempRow += " ";
                 }
-                for(int m=0;m<12;m++)
-                {
-                    twoSComplement[m] = bool_arr[m+4];
-                }
+            }
+            xmlWriter.writeTextElement("DataRow"+QString::number(j+1),TempRow);
+        }
+        xmlWriter.writeEndElement();
+    }
+    xmlWriter.writeEndElement();
+    xmlWriter.writeEndDocument();
+    newFile.close();
+}
+
+QString FormatChanger::hexToTemp(char t1,char t2)
+{
+    QByteArray temp;
+    temp.append(t1);
+    temp.append(t2);
+    bool bool_arr[16];
+    bool twoSComplement[12];
+    int tempTimes = 0;
+    for(int m=0;m<8;m++)
+    {
+        bool_arr[7-m] = ((t1 & 1<<m) != 0);
+        bool_arr[7-m+8] = ((t2 & 1<<m) != 0);
+    }
+    for(int m=0;m<12;m++)
+    {
+        twoSComplement[m] = bool_arr[m+4];
+    }
+    if(twoSComplement[0] == false)
+    {
+        for(int m=1;m<12;m++)
+        {
+            if(twoSComplement[m] == true)
+            {
+                tempTimes += pow(2,11-m);
             }
         }
     }
+    else
+    {
+        for(int m=11;m>=0;m--)
+        {
+            if(twoSComplement[m] == true)
+            {
+                twoSComplement[m] = false;
+                break;
+            }
+            else
+            {
+                twoSComplement[m] = true;
+            }
+        }
+        for(int m=1;m<12;m++)
+        {
+            if(twoSComplement[m] == false)
+            {
+                tempTimes += pow(2,11-m);
+            }
+        }
+    }
+    return QString::number(tempTimes * 0.25);
 }

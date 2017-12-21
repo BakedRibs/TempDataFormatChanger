@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QXmlStreamWriter>
+#include "math.h"
 
 class FormatChanger : public QDialog
 {
@@ -23,6 +24,7 @@ public:
     QPushButton *changeFormatButton;                    //开始转换文件格式
     QLabel *filePathLabel;                              //显示文件路径和文件名
     QString filePath;                                   //保存文件路径
+    QString hexToTemp(char t1,char t2);
 
 public slots:
     void openFile();                                    //根据路径打开txt文件
