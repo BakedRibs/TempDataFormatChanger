@@ -83,6 +83,11 @@ void FormatChanger::changeFormat()
         QStringList temperature = lineSL.mid(5,128);
         xmlWriter.writeStartElement("DataFrame"+QString::number(i+1));
         xmlWriter.writeTextElement("RC","8*8");
+
+        char r1 = thermistor.at(1).toInt(&ok,16)&0xFF;
+        char r2 = thermistor.at(0).toInt(&ok,16)&0xFF;
+        xmlWriter.writeTextElement("Thermistor",hexToTher(r1,r2));
+
         for(int j=0;j<8;j++)
         {
             QString TempRow;
@@ -103,13 +108,12 @@ void FormatChanger::changeFormat()
     xmlWriter.writeEndElement();
     xmlWriter.writeEndDocument();
     newFile.close();
+    filePathLabel->setText("Format changed successfully");
+    changeFormatButton->setEnabled(false);
 }
 
 QString FormatChanger::hexToTemp(char t1,char t2)
 {
-    QByteArray temp;
-    temp.append(t1);
-    temp.append(t2);
     bool bool_arr[16];
     bool twoSComplement[12];
     int tempTimes = 0;
@@ -150,9 +154,40 @@ QString FormatChanger::hexToTemp(char t1,char t2)
         {
             if(twoSComplement[m] == false)
             {
-                tempTimes += pow(2,11-m);
+                tempTimes -= pow(2,11-m);
             }
         }
     }
     return QString::number(tempTimes * 0.25);
+}
+
+QString FormatChanger::hexToTher(char t1, char t2)
+{
+    bool bool_arr[16];
+    bool twoSComplement[12];
+    int tempTimes = 0;
+    for(int m=0;m<8;m++)
+    {
+        bool_arr[7-m] = ((t1 & 1<<m) != 0);
+        bool_arr[7-m+8] = ((t2 & 1<<m) != 0);
+    }
+    for(int m=0;m<12;m++)
+    {
+        twoSComplement[m] = bool_arr[m+4];
+    }
+    for(int m=1;m<12;m++)
+    {
+        if(twoSComplement[m] == true)
+        {
+            if(twoSComplement[0] == false)
+            {
+                tempTimes += pow(2,11-m);
+            }
+            else
+            {
+                tempTimes -= pow(2,11-m);
+            }
+        }
+    }
+    return QString::number(tempTimes * 0.0125);
 }
