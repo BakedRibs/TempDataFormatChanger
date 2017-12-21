@@ -58,7 +58,6 @@ void FormatChanger::changeFormat()
     int times = file.size()/405;
     filePathLabel->setText(QString::number(fileSize));
     QTextStream in(&file);
-    QString line = in.read(405);
 
     QStringList list = filePath.split(".");
     QString newFilePath = list[0] + ".xml";
@@ -75,6 +74,36 @@ void FormatChanger::changeFormat()
     xmlWriter.writeStartElement("GridEyeData");
     for(int i=0;i<times;i++)
     {
+        bool ok;
+        QString line = in.read(405);
+        line = line.trimmed();
+        line = line.simplified();
+        QStringList lineSL = line.split(" ");
+        QStringList thermistor = lineSL.mid(3,2);
+        QStringList temperature = lineSL.mid(5,128);
         xmlWriter.writeStartElement("DataFrame"+QString::number(i+1));
+        xmlWriter.writeTextElement("RC","8*8");
+        for(int j=0;j<8;j++)
+        {
+            for(int k=0;k<8;k++)
+            {
+                QByteArray temp;
+                char c1 = temperature.at((j*8+k)*2+1).toInt(&ok,16)&0xFF;
+                char c2 = temperature.at((j*8+k)*2).toInt(&ok,16)&0xFF;
+                temp.append(c1);
+                temp.append(c2);
+                bool bool_arr[16];
+                bool twoSComplement[12];
+                for(int m=0;m<8;m++)
+                {
+                    bool_arr[7-m] = ((c1 & 1<<m) != 0);
+                    bool_arr[7-m+8] = ((c2 & 1<<m) != 0);
+                }
+                for(int m=0;m<12;m++)
+                {
+                    twoSComplement[m] = bool_arr[m+4];
+                }
+            }
+        }
     }
 }
