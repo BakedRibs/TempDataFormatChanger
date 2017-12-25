@@ -24,8 +24,8 @@ public:
     QPushButton *changeFormatButton;                    //开始转换文件格式
     QLabel *filePathLabel;                              //显示文件路径和文件名
     QString filePath;                                   //保存文件路径
-    QString hexToTemp(char t1,char t2);
-    QString hexToTher(char t1,char t2);
+    QString hexToTemp(char t1,char t2);                 //将十六进制字符串转化为64个温度值
+    QString hexToTher(char t1,char t2);                 //将十六进制字符串转化为1个Thermistor
 
 public slots:
     void openFile();                                    //根据路径打开txt文件
