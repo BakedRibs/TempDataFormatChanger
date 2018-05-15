@@ -160,7 +160,7 @@ QString FormatChanger::hexToTemp(char t1,char t2)                               
         }
     }
     return QString::number(tempTimes * 0.25);
-    //将倍数乘以0.25，得到温度值，此0.25是参考https://eu.industrial.panasonic.com/grideye-evalkit中提供的源代码
+    //将倍数乘以0.25，0.25为GridEye技术文档中的温度输出分辨率
 }
 
 QString FormatChanger::hexToTher(char t1, char t2)                              //将字符转化为Thermistor值
@@ -191,6 +191,6 @@ QString FormatChanger::hexToTher(char t1, char t2)                              
             }
         }
     }
-    return QString::number(tempTimes * 0.0125);
-    //将倍数乘以0.0125，得到Thermistor，此0.0125是参考https://eu.industrial.panasonic.com/grideye-evalkit中提供的源代码
+    return QString::number(tempTimes * 0.0625);
+    //将倍数乘以0.0625，得到Thermistor，此0.0125是根据GridEye技术文档中的温度输出分辨率
 }
